@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODS 2: Fome Zero - Chat e Artigos</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #FDF4E3;
+        }
+        .container {
+            display: flex;
+            height: 100%;
+        }
+        .chat-container {
+            flex: 1;
+            max-width: 800px;
+            margin: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 40px);
+        }
+        .articles-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .chat-header {
+            background-color: #DDA63A;
+            color: white;
+            padding: 20px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            text-align: center;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #FDF4E3;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .bot-message {
+            background-color: #F5E2C0;
+            align-self: flex-start;
+        }
+        .chat-input {
+            display: flex;
+            padding: 20px;
+        }
+        #user-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #DDA63A;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        #send-button {
+            padding: 10px 20px;
+            background-color: #DDA63A;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #send-button:hover {
+            background-color: #C18F2A;
+        }
+        .article {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .article h2 {
+            color: #DDA63A;
+        }
+        @media (max-width: 1200px) {
+            .container {
+                flex-direction: column;
+            }
+            .chat-container, .articles-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h1>Chat sobre ODS 2: Fome Zero</h1>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Digite sua mensagem...">
+                <button id="send-button">Enviar</button>
+            </div>
+        </div>
+        <div class="articles-container">
+            <div class="article">
+                <h2>O que é a ODS 2?</h2>
+                <p>A ODS 2, ou Objetivo de Desenvolvimento Sustentável 2, visa acabar com a fome, alcançar a segurança alimentar e melhoria da nutrição e promover a agricultura sustentável até 2030. Este objetivo é crucial para garantir que todas as pessoas, especialmente as mais vulneráveis, tenham acesso a alimentos suficientes e nutritivos durante todo o ano.</p>
+            </div>
+            <div class="article">
+                <h2>Desafios da Fome Zero</h2>
+                <p>Alcançar a fome zero é um desafio complexo que envolve diversos fatores, incluindo pobreza, mudanças climáticas, conflitos e desigualdades econômicas. A pandemia de COVID-19 agravou ainda mais a situação, revertendo anos de progresso na luta contra a fome e a desnutrição.</p>
+            </div>
+            <div class="article">
+                <h2>Agricultura Sustentável</h2>
+                <p>A promoção da agricultura sustentável é um componente essencial da ODS 2. Isso inclui práticas que aumentam a produtividade e a produção, que ajudam a manter os ecossistemas, que fortalecem a capacidade de adaptação às mudanças climáticas e que melhoram progressivamente a qualidade da terra e do solo.</p>
+            </div>
+            <div class="article">
+                <h2>Como Você Pode Contribuir</h2>
+                <p>Cada indivíduo pode contribuir para a ODS 2. Algumas ações incluem: reduzir o desperdício de alimentos, apoiar agricultores locais, escolher alimentos produzidos de forma sustentável, e se envolver em iniciativas comunitárias que promovam a segurança alimentar e a nutrição adequada para todos.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        const apiEndpoint = 'https://aula44450369010.openai.azure.com/openai/deployments/gpt-4-w/chat/completions?api-version=2023-03-15-preview';
+        const apiKey = '23a76922fd8f4c5897abd55cbbecee1e';
+
+        const systemPrompt = "Você é um agente para conversar com os usuários sobre a ODS 2: Erradicação da fome, deve se focar em respostas objetivas e verdadeiras.";
+
+        const fewShotExamples = [
+            {"chatbotResponse":"O objetivo principal do ODS 2 é acabar com a fome, garantir o acesso a alimentos seguros, nutritivos e suficientes para todas as pessoas, especialmente para crianças, e promover a agricultura sustentável.","userInput":"Qual é o objetivo principal do ODS 2?"},
+            {"chatbotResponse":"As principais causas da fome incluem a pobreza, a desigualdade, os conflitos, as mudanças climáticas, a falta de infraestrutura agrícola e a má distribuição de alimentos. Esses fatores podem afetar a disponibilidade e o acesso a alimentos nutritivos.","userInput":"Quais são algumas das principais causas da fome no mundo?"},
+            {"chatbotResponse":"A agricultura sustentável melhora a produtividade alimentar, protege os recursos naturais e promove a resiliência das comunidades. Ao utilizar práticas agrícolas que preservam o meio ambiente e garantem a segurança alimentar, é possível aumentar a disponibilidade de alimentos e melhorar a nutrição.","userInput":"Como a agricultura sustentável pode ajudar a erradicar a fome?"},
+            {"chatbotResponse":"Indivíduos e comunidades podem apoiar a agricultura local, reduzir o desperdício de alimentos, participar de bancos de alimentos, educar sobre nutrição e advocacy para políticas que promovam a segurança alimentar e o acesso a recursos para agricultores.","userInput":"Quais ações podem ser tomadas por indivíduos e comunidades para ajudar a erradicar a fome?"}
+        ];
+
+        let conversationHistory = [
+            { role: "system", content: systemPrompt },
+            ...fewShotExamples.flatMap(example => [
+                { role: "user", content: example.userInput },
+                { role: "assistant", content: example.chatbotResponse }
+            ])
+        ];
+
+        function addMessage(content, isUser = false) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageElement.textContent = content;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (userMessage === '') return;
+
+            addMessage(userMessage, true);
+            userInput.value = '';
+
+            conversationHistory.push({ role: "user", content: userMessage });
+
+            try {
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'api-key': apiKey
+                    },
+                    body: JSON.stringify({
+                        messages: conversationHistory,
+                        max_tokens: 800,
+                        temperature: 0.7,
+                        top_p: 0.95,
+                        frequency_penalty: 0,
+                        presence_penalty: 0
+                    })
+                });
+
+                const data = await response.json();
+                const botResponse = data.choices[0].message.content;
+
+                addMessage(botResponse);
+                conversationHistory.push({ role: "assistant", content: botResponse });
+
+                // Limite o histórico de conversas para as últimas 10 mensagens
+                if (conversationHistory.length > 20) {
+                    conversationHistory = [
+                        conversationHistory[0],
+                        ...conversationHistory.slice(-19)
+                    ];
+                }
+            } catch (error) {
+                console.error('Erro ao enviar mensagem:', error);
+                addMessage('Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.');
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
